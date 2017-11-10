@@ -1,5 +1,5 @@
 # RESTFul-TodosApp-API
-Example of simple Express.js RESTFul App, Including Test case using mocha and other assertion library.
+Example of simple express.js RESTFul app. Including test case using mocha and other assertion library.
 
 Before started : 
 1. Require Node.JS 8.9.X Version
