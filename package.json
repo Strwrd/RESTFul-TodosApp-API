@@ -1,7 +1,7 @@
 {
-  "name": "todoapp",
+  "name": "todosapp",
   "version": "1.0.0",
-  "description": "Todo apps",
+  "description": "Todos apps",
   "main": "app.js",
   "scripts": {
     "start": "node app.js",
