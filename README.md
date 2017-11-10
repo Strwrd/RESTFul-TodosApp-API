@@ -6,7 +6,7 @@ Before started :
 2. Require MongoDB 2.2.X
 
 Then : 
-1. git Clone https://github.com/Strwrd/RESTFul-TodosApp-API
+1. git clone https://github.com/Strwrd/RESTFul-TodosApp-API
 2. npm install
 3. done (:
 
