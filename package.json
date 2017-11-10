@@ -1,0 +1,26 @@
+{
+  "name": "todoapp",
+  "version": "1.0.0",
+  "description": "Todo apps",
+  "main": "index.js",
+  "scripts": {
+    "start": "node app.js",
+    "test": "export NODE_ENV=test || SET NODE_ENV=test && mocha test/**/*.test.js",
+    "test-watch": "nodemon --exec 'npm test'"
+  },
+  "author": "strwrd",
+  "license": "ISC",
+  "dependencies": {
+    "body-parser": "^1.18.2",
+    "express": "^4.16.2",
+    "lodash": "^4.17.4",
+    "mongodb": "^2.2.33",
+    "mongoose": "^4.13.0"
+  },
+  "devDependencies": {
+    "expect": "^1.20.2",
+    "mocha": "^4.0.1",
+    "nodemon": "^1.12.1",
+    "supertest": "^3.0.0"
+  }
+}

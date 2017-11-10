@@ -1,0 +1,102 @@
+//Third Pary Modules
+const express = require('express');
+const {ObjectID} = require('mongodb').ObjectID;
+const _ = require('lodash');
+
+//Init Express Router
+const router = express.Router();
+
+//Local Modules
+const {Todo} = require('./../models/todo');
+const db = require('./../config/db');
+
+//POST => Create Todo
+router.post('/todos/', (req, res) => {
+	const newTodo = new Todo({
+		text: req.body.text
+	});
+
+	newTodo.save().then((obj) => {
+		return res.send({obj});
+	}).catch((e) => {
+		return res.status(400).send();
+	});
+});
+
+//GET => Getting All Todo
+router.get('/todos', (req, res) => {
+	Todo.find().then((obj) => {
+		if (!obj) {
+			return res.status(404).send();
+		}
+		return res.send({obj});
+	}).catch((e) => {
+		return res.status(400).send();
+	});
+});
+
+//GET => Getting Todo by ID
+router.get('/todos/:id', (req, res) => {
+
+	if (!ObjectID.isValid(req.params.id)) {
+		return res.status(400).send();
+	}
+
+	Todo.findById(req.params.id).then((obj) => {
+		if(!obj){
+			return res.status(404).send();
+		}
+
+		return res.send({obj});
+	}).catch((e) => {
+		return res.status(400).send();
+	})
+});
+
+//PATCH => Update Todo by ID
+router.patch('/todos/:id', (req, res) => {
+
+	if (!ObjectID.isValid(req.params.id)) {
+		return res.status(400).send()
+	}
+
+	const body = _.pick(req.body, ['text', 'completed']);
+
+	if (_.isBoolean(body.completed) && body.completed) {
+		body.completedAt = new Date().getDate();
+	} else {
+		body.completed = false;
+		body.completedAt = null;
+	}
+
+	Todo.findByIdAndUpdate(req.params.id, {$set: body}, {new: true}).then((obj) => {
+		if (!obj) {
+			return res.status(404).send()
+		}
+
+		return res.send({obj});
+	}).catch((e) => {
+		return res.status(400).send(e);
+	})
+});
+
+//DELETE => Delete Todo byID
+router.delete('/todos/:id', (req, res) => {
+
+	if(!ObjectID.isValid(req.params.id)){
+		return res.status(400).send();
+	}
+
+	Todo.findByIdAndRemove(req.params.id).then((obj) => {
+		if(!obj){
+			return res.status(404).send();
+		}
+
+		return res.send({obj});
+	}).catch((e) => {
+		res.status(400).send();
+	})
+});
+
+//Export modules
+module.exports = router;
