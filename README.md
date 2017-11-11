@@ -3,8 +3,8 @@ Example of simple express.js RESTFul app. Including test case using mocha and ot
 
 Before started : 
 1. Require Node.JS 8.9.X Version
-2. Require MongoDB 2.2.X
-3. Require POSTMAN (Optional : to test API app)
+2. Require MongoDB 3.6.X
+3. Require Postman (Optional : to test API app)
 
 Then : 
 1. git clone https://github.com/Strwrd/RESTFul-TodosApp-API
@@ -13,7 +13,7 @@ Then :
 
 Development Run :
 1. node app.js (or) 
-2. nodemon app.js -e js (autorestart app when code is changed)
+2. nodemon app.js -e js (autorestart app when *.js code is changed)
 
 Test Run :
 1. npm test (or) 
