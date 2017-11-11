@@ -9,6 +9,7 @@ const router = express.Router();
 //Local Modules
 const {User} = require('./../models/user');
 const db = require('./../config/db');
+const {authenticate} = require('./../middleware/authenticate');
 
 //POST => Create User
 router.post('/users', (req, res) => {
@@ -23,6 +24,10 @@ router.post('/users', (req, res) => {
 	}).catch((e) => {
 		return res.status(400).send(e);
 	});
+});
+
+router.get('/users/me', authenticate ,(req, res) => {
+	res.send(req.user);
 });
 
 //Export modules

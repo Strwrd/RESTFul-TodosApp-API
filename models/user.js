@@ -34,7 +34,7 @@ const UserSchema = new mongoose.Schema({
 		}
 	}]
 }, {
-	usePushEach : true
+	usePushEach: true
 });
 
 //  Model Instance Method override toJSON function
@@ -42,19 +42,37 @@ UserSchema.methods.toJSON = function () {
 	const user = this;
 	const userObject = user.toObject();
 
-	return _.pick(userObject,['_id','email'])
+	return _.pick(userObject, ['_id', 'email'])
 };
 
 // Model Instance Method generateAuthToken
 UserSchema.methods.generateAuthToken = function () {
 	const user = this;
 	const access = 'auth';
-	const token = jwt.sign({ _id: user._id.toHexString(),access},'secret').toString();
+	const token = jwt.sign({_id: user._id.toHexString(), access}, 'secret').toString();
 
 	user.tokens.push({access, token});
 
 	return user.save().then(() => {
 		return token;
+	});
+};
+
+// Static Method findByToken
+UserSchema.statics.findByToken = function (token) {
+	const User = this;
+	let decoded;
+
+	try {
+		decoded = jwt.verify(token, 'secret');
+	} catch (e) {
+		return Promise.reject();
+	}
+
+	return User.findOne({
+		'_id' : decoded._id,
+		'tokens.token' : token,
+		'tokens.access' : 'auth'
 	});
 };
 
