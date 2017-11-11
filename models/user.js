@@ -37,6 +37,7 @@ const UserSchema = new mongoose.Schema({
 	usePushEach : true
 });
 
+//  Model Instance Method override toJSON function
 UserSchema.methods.toJSON = function () {
 	const user = this;
 	const userObject = user.toObject();
