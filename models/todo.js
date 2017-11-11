@@ -20,6 +20,4 @@ const Todo = mongoose.model('Todo',{
 });
 
 //Export Module
-module.exports = {
-	Todo
-};
+module.exports = {Todo};
