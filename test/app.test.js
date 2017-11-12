@@ -7,25 +7,11 @@ const _ = require('lodash');
 //Local Module
 const {app} = require('./../app');
 const {Todo} = require('./../models/todo');
+const {seedTodos,seedUsers, dummyTodo,dummyUser} = require('./seed/seed');
 
-//Init Some Dummy Data
-const dummyTodo = [{
-	_id : new ObjectID(),
-	text: "First Dummy todo",
-	completed: false,
-	completedAt: 33
-}, {
-	text: "Second Dummy todo",
-	completed: false,
-	completedAt: null
-}];
-
-//Test Seeder
-beforeEach((done) => {
-	Todo.remove().then(() => {
-		return Todo.insertMany(dummyTodo);
-	}).then(() => done());
-});
+// Seeder
+beforeEach(seedUsers);
+beforeEach(seedTodos);
 
 //Test Case
 describe('GET /todos', () => {

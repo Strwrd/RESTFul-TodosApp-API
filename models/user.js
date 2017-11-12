@@ -77,6 +77,7 @@ UserSchema.statics.findByToken = function (token) {
 	});
 };
 
+// Execute before save user
 UserSchema.pre('save', function (next) {
 	const user = this;
 
@@ -97,4 +98,5 @@ UserSchema.pre('save', function (next) {
 //Creating User Model
 const User = mongoose.model('User', UserSchema);
 
+//Export Module
 module.exports = {User};
