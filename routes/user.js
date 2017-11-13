@@ -27,7 +27,7 @@ router.post('/users', (req, res) => {
 });
 
 router.get('/users/me', authenticate ,(req, res) => {
-	res.send(req.user);
+	res.send(req.user)
 });
 
 //Export modules
