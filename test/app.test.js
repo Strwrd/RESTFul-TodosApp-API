@@ -231,24 +231,78 @@ describe('User Test Cases', () => {
 		it('Should not create user if email is not unique', (done) => {
 
 			const email = 'userOne@examples.com';
-			const pass = 'secretOne';
+			const password = 'secretOne';
 
 			request(app)
 				.post('/users')
-				.send({email, pass})
+				.send({email, password})
 				.expect(400)
 				.end(done);
 		});
 
 		it('Should return validation error if request invalid', (done) => {
 			const email = '';
-			const pass = 'adfgfx';
+			const password = 'adfgfx';
 
 			request(app)
 				.post('/users')
-				.send({email, pass})
+				.send({email, password})
 				.expect(400)
 				.end(done);
 		});
 	});
+
+	describe('POST /users/login', () => {
+		it('Should return auth token if user credentials is match', (done) => {
+			const {email, password} = _.pick(dummyUser[1], ['email', 'password']);
+
+			request(app)
+				.post('/users/login')
+				.send({email,password})
+				.expect(200)
+				.expect((res) => {
+					expect(res.header['x-auth']).toExist();
+				})
+				.end((err,res) => {
+					if(err){
+						return done(err);
+					}
+
+					User.findById(dummyUser[1]._id).then((obj) => {
+						expect(obj.tokens[0]).toInclude({
+							access : 'auth',
+							token : res.header['x-auth']
+						});
+						done();
+					}).catch((e) => {
+						return done(e);
+					});
+				});
+		});
+
+		it('Should not return auth token if credentials is not match or invalid data body', (done) => {
+			request(app)
+				.post('/users/login')
+				.send({
+					email: 'userTwo@examples.com',
+					password: 'secretTow'
+				})
+				.expect(400)
+				.expect((res) => {
+					expect(res.header['x-auth']).toNotExist();
+				})
+				.end((err,res) => {
+					if(err){
+						return done(err);
+					}
+
+					User.findById(dummyUser[1]._id).then((obj) => {
+						expect(obj.tokens.length).toBe(0);
+						done()
+					}).catch((e) => {
+						return done(e);
+					});
+				});
+		});
+	})
 });
