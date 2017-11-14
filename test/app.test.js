@@ -258,20 +258,20 @@ describe('User Test Cases', () => {
 
 			request(app)
 				.post('/users/login')
-				.send({email,password})
+				.send({email, password})
 				.expect(200)
 				.expect((res) => {
 					expect(res.header['x-auth']).toExist();
 				})
-				.end((err,res) => {
-					if(err){
+				.end((err, res) => {
+					if (err) {
 						return done(err);
 					}
 
 					User.findById(dummyUser[1]._id).then((obj) => {
 						expect(obj.tokens[0]).toInclude({
-							access : 'auth',
-							token : res.header['x-auth']
+							access: 'auth',
+							token: res.header['x-auth']
 						});
 						done();
 					}).catch((e) => {
@@ -291,8 +291,8 @@ describe('User Test Cases', () => {
 				.expect((res) => {
 					expect(res.header['x-auth']).toNotExist();
 				})
-				.end((err,res) => {
-					if(err){
+				.end((err, res) => {
+					if (err) {
 						return done(err);
 					}
 
@@ -304,5 +304,34 @@ describe('User Test Cases', () => {
 					});
 				});
 		});
-	})
+	});
+
+	describe('DELETE /users/me/token', () => {
+		it('Should delete user auth token on logout', (done) => {
+			request(app)
+				.delete('/users/me/token')
+				.set('x-auth', dummyUser[0].tokens[0].token)
+				.expect(200)
+				.end((err, res) => {
+					if(err){
+						return done(err);
+					}
+
+					User.findById(dummyUser[0]._id).then((obj) => {
+						expect(obj.tokens.length).toBe(0);
+						done();
+					}).catch((e) => {
+						return done(e);
+					})
+			});
+		});
+
+		it('Should return 401 if auth token not valid', (done) => {
+			request(app)
+				.delete('/users/me/token')
+				.set('x-auth', '')
+				.expect(401)
+				.end(done);
+		});
+	});
 });
