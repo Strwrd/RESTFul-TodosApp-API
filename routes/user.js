@@ -45,5 +45,14 @@ router.post('/users/login', (req, res) => {
 	});
 });
 
+//DELETE => Logout
+router.delete('/users/me/logout',authenticate, (req, res) => {
+	req.user.removeToken(req.token).then(() => {
+		res.status(200).send()
+	}).catch((e) => {
+		res.status(400).send()
+	})
+});
+
 //Export modules
 module.exports = router;

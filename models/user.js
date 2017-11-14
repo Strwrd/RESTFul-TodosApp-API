@@ -59,6 +59,19 @@ UserSchema.methods.generateAuthToken = function () {
 	});
 };
 
+// Model Instace Method removeToken
+UserSchema.methods.removeToken = function (token) {
+	const user = this;
+
+	return user.update({
+		$pull : {
+			tokens : {
+				token
+			}
+		}
+	});
+};
+
 // Static Method findByToken
 UserSchema.statics.findByToken = function (token) {
 	const User = this;
