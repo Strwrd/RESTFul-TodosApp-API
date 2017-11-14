@@ -9,11 +9,13 @@ const router = express.Router();
 //Local Modules
 const {Todo} = require('./../models/todo');
 const db = require('./../config/db');
+const {authenticate} = require('./../middleware/authenticate');
 
 //POST => Create Todo
-router.post('/todos/', (req, res) => {
+router.post('/todos/',authenticate,(req, res) => {
 	const newTodo = new Todo({
-		text: req.body.text
+		text: req.body.text,
+		creator : req.user._id
 	});
 
 	newTodo.save().then((obj) => {
@@ -24,8 +26,10 @@ router.post('/todos/', (req, res) => {
 });
 
 //GET => Getting All Todo
-router.get('/todos', (req, res) => {
-	Todo.find().then((obj) => {
+router.get('/todos', authenticate,(req, res) => {
+	Todo.find({
+		creator: req.user._id
+	}).then((obj) => {
 		if (!obj) {
 			return res.status(404).send();
 		}

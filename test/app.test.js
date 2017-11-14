@@ -17,12 +17,13 @@ beforeEach(seedTodos);
 //Todo test case block
 describe('Todo Test Cases', () => {
 	describe('GET /todos', () => {
-		it('Should get all todo (expect : 2)', (done) => {
+		it('Should get all todo of userOne by passing token', (done) => {
 			request(app)
 				.get('/todos')
+				.set('x-auth',dummyUser[0].tokens[0].token)
 				.expect(200)
 				.expect((res) => {
-					expect(res.body.obj.length).toBe(2);
+					expect(res.body.obj.length).toBe(1);
 				})
 				.end(done);
 		});
@@ -67,12 +68,25 @@ describe('Todo Test Cases', () => {
 
 			request(app)
 				.post('/todos')
+				.set('x-auth',dummyUser[0].tokens[0].token)
 				.send({text})
 				.expect(200)
 				.expect((res) => {
 					expect(res.body.obj.text).toBe(text);
 				})
-				.end(done);
+				.end((err,res) => {
+					if(err){
+						return done(err);
+					}
+
+					Todo.find({text}).then((obj) => {
+						expect(obj[0].text).toBe(text);
+						expect(obj.length).toBe(1);
+						done();
+					}).catch((e) => {
+						return done(e);
+					});
+				});
 		});
 
 		it('Should not create todo with invalid data body', (done) => {
@@ -80,6 +94,7 @@ describe('Todo Test Cases', () => {
 
 			request(app)
 				.post('/todos')
+				.set('x-auth',dummyUser[0].tokens[0].token)
 				.send({text})
 				.expect(400)
 				.expect((res) => {
