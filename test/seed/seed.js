@@ -22,6 +22,10 @@ const dummyUser = [{
 	_id : idUserTwo,
 	email : 'userTwo@examples.com',
 	password : 'secretTwo',
+	tokens : [{
+		access : 'auth',
+		token : jwt.sign({_id: idUserTwo.toHexString(), access : 'auth'}, 'secret').toString()
+	}]
 }];
 
 //Create Some Dummy Todo
@@ -32,6 +36,7 @@ const dummyTodo = [{
 	completedAt: 33,
 	creator : idUserOne
 }, {
+	_id : new ObjectID(),
 	text: "Second Dummy todo",
 	completed: false,
 	completedAt: null,

@@ -30,9 +30,10 @@ describe('Todo Test Cases', () => {
 	});
 
 	describe('GET /todos/:id', () => {
-		it('Should return first todo by ID', (done) => {
+		it('Should return todo by ID', (done) => {
 			request(app)
 				.get(`/todos/${dummyTodo[0]._id.toHexString()}`)
+				.set('x-auth',dummyUser[0].tokens[0].token)
 				.expect(200)
 				.expect((res) => {
 					expect(res.body.obj._id).toBe(dummyTodo[0]._id.toHexString());
@@ -41,9 +42,22 @@ describe('Todo Test Cases', () => {
 				}).end(done);
 		});
 
+		it('Should not return todo created by other user', (done) => {
+			request(app)
+				.get(`/todos/${dummyTodo[1]._id.toHexString()}`)
+				.set('x-auth',dummyUser[0].tokens[0].token)
+				.expect(404)
+				.expect((res) => {
+					expect(res.body).toEqual({});
+				}).end(done);
+		});
+
+
+
 		it('Should not return if Object ID not valid', (done) => {
 			request(app)
 				.get('/todos/qwerty')
+				.set('x-auth',dummyUser[0].tokens[0].token)
 				.expect(400)
 				.expect((res) => {
 					expect(res.body).toEqual({})
@@ -54,6 +68,7 @@ describe('Todo Test Cases', () => {
 		it('Should not return if Object ID not found', (done) => {
 			request(app)
 				.get(`/todos/${new ObjectID().toHexString()}`)
+				.set('x-auth',dummyUser[0].tokens[0].token)
 				.expect(404)
 				.expect((res) => {
 					expect(res.body).toEqual({});
@@ -113,12 +128,30 @@ describe('Todo Test Cases', () => {
 
 			request(app)
 				.patch(`/todos/${dummyTodo[0]._id.toHexString()}`)
+				.set('x-auth',dummyUser[0].tokens[0].token)
 				.send(update)
 				.expect(200)
 				.expect((res) => {
 					expect(res.body.obj.completedAt).toBeA('number');
 					expect(res.body.obj.text).toBe(update.text);
 					expect(res.body.obj.completed).toBe(update.completed);
+				})
+				.end(done);
+		});
+
+		it('Should not update todo created by other user', (done) => {
+			const update = {
+				text: "Updated first todo",
+				completed: true
+			};
+
+			request(app)
+				.patch(`/todos/${dummyTodo[0]._id.toHexString()}`)
+				.set('x-auth', dummyUser[1].tokens[0].token)
+				.send(update)
+				.expect(404)
+				.expect((res) => {
+					expect(res.body).toEqual({});
 				})
 				.end(done);
 		});
@@ -130,6 +163,7 @@ describe('Todo Test Cases', () => {
 
 			request(app)
 				.patch(`/todos/${dummyTodo[0]._id.toHexString()}`)
+				.set('x-auth',dummyUser[0].tokens[0].token)
 				.send(update)
 				.expect(200)
 				.expect((res) => {
@@ -142,19 +176,46 @@ describe('Todo Test Cases', () => {
 
 	describe('DELETE /todos/:id', () => {
 		it('Should delete todo by ID', (done) => {
+			const todoId = dummyTodo[0]._id.toHexString();
+
 			request(app)
-				.delete(`/todos/${dummyTodo[0]._id.toHexString()}`)
+				.delete(`/todos/${todoId}`)
+				.set('x-auth',dummyUser[0].tokens[0].token)
 				.expect(200)
 				.expect((res) => {
-					expect(res.body.obj._id).toBe(dummyTodo[0]._id.toHexString());
+					expect(res.body.obj._id).toBe(todoId);
 				})
 				.end((err, res) => {
 					if (err) {
 						return done(err);
 					}
 
-					Todo.findById(dummyTodo[0]._id).then((obj) => {
+					Todo.findById(todoId).then((obj) => {
 						expect(obj).toNotExist();
+						done()
+					}).catch((e) => {
+						done(e);
+					})
+				})
+		});
+
+		it('Should not delete todo created by other user', (done) => {
+			const todoId = dummyTodo[1]._id.toHexString();
+
+			request(app)
+				.delete(`/todos/${todoId}`)
+				.set('x-auth',dummyUser[0].tokens[0].token)
+				.expect(404)
+				.expect((res) => {
+					expect(res.body).toEqual({});
+				})
+				.end((err, res) => {
+					if (err) {
+						return done(err);
+					}
+
+					Todo.findById(todoId).then((obj) => {
+						expect(obj).toExist();
 						done()
 					}).catch((e) => {
 						done(e);
@@ -165,6 +226,7 @@ describe('Todo Test Cases', () => {
 		it('Should not delete todo if ObjectID not valid', (done) => {
 			request(app)
 				.delete('/todos/123abc')
+				.set('x-auth',dummyUser[0].tokens[0].token)
 				.expect(400)
 				.expect((res) => {
 					expect(res.body).toEqual({});
@@ -175,6 +237,7 @@ describe('Todo Test Cases', () => {
 		it('Should not delete todo if ObjectID not found', (done) => {
 			request(app)
 				.delete(`/todos/${new ObjectID()}`)
+				.set('x-auth',dummyUser[0].tokens[0].token)
 				.expect(404)
 				.expect((res) => {
 					expect(res.body).toEqual({});
@@ -284,7 +347,7 @@ describe('User Test Cases', () => {
 					}
 
 					User.findById(dummyUser[1]._id).then((obj) => {
-						expect(obj.tokens[0]).toInclude({
+						expect(obj.tokens[1]).toInclude({
 							access: 'auth',
 							token: res.header['x-auth']
 						});
@@ -312,7 +375,7 @@ describe('User Test Cases', () => {
 					}
 
 					User.findById(dummyUser[1]._id).then((obj) => {
-						expect(obj.tokens.length).toBe(0);
+						expect(obj.tokens.length).toBe(1);
 						done()
 					}).catch((e) => {
 						return done(e);

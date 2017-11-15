@@ -12,10 +12,10 @@ const db = require('./../config/db');
 const {authenticate} = require('./../middleware/authenticate');
 
 //POST => Create Todo
-router.post('/todos/',authenticate,(req, res) => {
+router.post('/todos/', authenticate, (req, res) => {
 	const newTodo = new Todo({
 		text: req.body.text,
-		creator : req.user._id
+		creator: req.user._id
 	});
 
 	newTodo.save().then((obj) => {
@@ -26,7 +26,7 @@ router.post('/todos/',authenticate,(req, res) => {
 });
 
 //GET => Getting All Todo
-router.get('/todos', authenticate,(req, res) => {
+router.get('/todos', authenticate, (req, res) => {
 	Todo.find({
 		creator: req.user._id
 	}).then((obj) => {
@@ -40,17 +40,19 @@ router.get('/todos', authenticate,(req, res) => {
 });
 
 //GET => Getting Todo by ID
-router.get('/todos/:id', (req, res) => {
+router.get('/todos/:id', authenticate, (req, res) => {
 
 	if (!ObjectID.isValid(req.params.id)) {
 		return res.status(400).send();
 	}
 
-	Todo.findById(req.params.id).then((obj) => {
-		if(!obj){
+	Todo.findOne({
+		_id: req.params.id,
+		creator: req.user._id
+	}).then((obj) => {
+		if (!obj) {
 			return res.status(404).send();
 		}
-
 		return res.send({obj});
 	}).catch((e) => {
 		return res.status(400).send();
@@ -58,7 +60,7 @@ router.get('/todos/:id', (req, res) => {
 });
 
 //PATCH => Update Todo by ID
-router.patch('/todos/:id', (req, res) => {
+router.patch('/todos/:id', authenticate,(req, res) => {
 
 	if (!ObjectID.isValid(req.params.id)) {
 		return res.status(400).send()
@@ -73,7 +75,10 @@ router.patch('/todos/:id', (req, res) => {
 		body.completedAt = null;
 	}
 
-	Todo.findByIdAndUpdate(req.params.id, {$set: body}, {new: true}).then((obj) => {
+	Todo.findOneAndUpdate({
+		_id : req.params.id,
+		creator : req.user._id
+	}, {$set: body}, {new: true}).then((obj) => {
 		if (!obj) {
 			return res.status(404).send()
 		}
@@ -85,14 +90,14 @@ router.patch('/todos/:id', (req, res) => {
 });
 
 //DELETE => Delete Todo byID
-router.delete('/todos/:id', (req, res) => {
+router.delete('/todos/:id', authenticate, (req, res) => {
 
-	if(!ObjectID.isValid(req.params.id)){
+	if (!ObjectID.isValid(req.params.id)) {
 		return res.status(400).send();
 	}
 
-	Todo.findByIdAndRemove(req.params.id).then((obj) => {
-		if(!obj){
+	Todo.findOneAndRemove({ _id :req.params.id, creator : req.user._id}).then((obj) => {
+		if (!obj) {
 			return res.status(404).send();
 		}
 
