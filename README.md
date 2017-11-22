@@ -1,21 +1,22 @@
 # RESTFul-TodosApp-API
-Example of simple express.js RESTFul app. Including test case using mocha and other assertion library.
+Example of express.js RESTFul app. Including test case using mocha and other assertion library.
 
-Before started : 
+### Before started : 
 1. Require Node.JS 8.9.X Version
 2. Require MongoDB 3.6.X
 3. Require Postman (Optional : to test API app)
 
-Then : 
+### Then : 
 1. git clone https://github.com/Strwrd/RESTFul-TodosApp-API
 2. npm install
+4. Set config variable at config/config.json
 3. done (:
 
-Development Run :
+### Development Run :
 1. node app.js (or) 
 2. nodemon app.js -e js (autorestart app when *.js code is changed)
 
-Test Run :
+### Test Run :
 1. npm test (or) 
 2. npm run test-watch (autorestart app when code is changed)
 
