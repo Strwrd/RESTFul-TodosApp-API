@@ -132,7 +132,7 @@ describe('Todo Test Cases', () => {
 				.send(update)
 				.expect(200)
 				.expect((res) => {
-					expect(res.body.obj.completedAt).toBeA('number');
+					expect(typeof res.body.obj.completedAt).toBe('number');
 					expect(res.body.obj.text).toBe(update.text);
 					expect(res.body.obj.completed).toBe(update.completed);
 				})
@@ -191,7 +191,7 @@ describe('Todo Test Cases', () => {
 					}
 
 					Todo.findById(todoId).then((obj) => {
-						expect(obj).toNotExist();
+						expect(obj).toBeFalsy();
 						done()
 					}).catch((e) => {
 						done(e);
@@ -215,7 +215,7 @@ describe('Todo Test Cases', () => {
 					}
 
 					Todo.findById(todoId).then((obj) => {
-						expect(obj).toExist();
+						expect(obj).toBeTruthy();
 						done()
 					}).catch((e) => {
 						done(e);
@@ -286,8 +286,8 @@ describe('User Test Cases', () => {
 				.expect(200)
 				.expect((res) => {
 					expect(res.body.email).toBe(email);
-					expect(res.body._id).toExist();
-					expect(res.header['x-auth']).toExist();
+					expect(res.body._id).toBeTruthy();
+					expect(res.header['x-auth']).toBeTruthy();
 				})
 				.end((err) => {
 					if (err) {
@@ -299,9 +299,11 @@ describe('User Test Cases', () => {
 							return done(new Error());
 						}
 
-						expect(obj).toExist();
-						expect(obj.password).toNotBe(password);
+						expect(obj).toBeTruthy();
+						expect(obj.password).not.toBe(password);
 						done();
+					}).catch((e) => {
+						return done(e);
 					})
 				});
 		});
@@ -339,7 +341,7 @@ describe('User Test Cases', () => {
 				.send({email, password})
 				.expect(200)
 				.expect((res) => {
-					expect(res.header['x-auth']).toExist();
+					expect(res.header['x-auth']).toBeTruthy();
 				})
 				.end((err, res) => {
 					if (err) {
@@ -347,7 +349,7 @@ describe('User Test Cases', () => {
 					}
 
 					User.findById(dummyUser[1]._id).then((obj) => {
-						expect(obj.tokens[1]).toInclude({
+						expect(obj.toObject().tokens[1]).toMatchObject({
 							access: 'auth',
 							token: res.header['x-auth']
 						});
@@ -367,7 +369,7 @@ describe('User Test Cases', () => {
 				})
 				.expect(400)
 				.expect((res) => {
-					expect(res.header['x-auth']).toNotExist();
+					expect(res.header['x-auth']).toBeFalsy();
 				})
 				.end((err, res) => {
 					if (err) {
