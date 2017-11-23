@@ -42,27 +42,22 @@ const UserSchema = new mongoose.Schema({
 UserSchema.methods.toJSON = function () {
 	const user = this;
 	const userObject = user.toObject();
-
-	return _.pick(userObject, ['_id', 'email'])
+	return _.pick(userObject, ['_id', 'email']);
 };
 
 // Model Instance Method generateAuthToken
-UserSchema.methods.generateAuthToken = function () {
+UserSchema.methods.generateAuthToken = async function () {
 	const user = this;
 	const access = 'auth';
-	const token = jwt.sign({_id: user._id.toHexString(), access}, process.env.JWT_SECRET ).toString();
-
+	const token = await jwt.sign({_id: user._id.toHexString(), access}, process.env.JWT_SECRET ).toString();
 	user.tokens.push({access, token});
-
-	return user.save().then(() => {
-		return token;
-	});
+	user.save();
+	return token;
 };
 
 // Model Instace Method removeToken
 UserSchema.methods.removeToken = function (token) {
 	const user = this;
-
 	return user.update({
 		$pull : {
 			tokens : {
@@ -73,59 +68,53 @@ UserSchema.methods.removeToken = function (token) {
 };
 
 // Static Method findByToken
-UserSchema.statics.findByToken = function (token) {
+UserSchema.statics.findByToken = async function (token) {
 	const User = this;
-	let decoded;
 
 	try {
-		decoded = jwt.verify(token, process.env.JWT_SECRET);
+		const decoded = await jwt.verify(token, process.env.JWT_SECRET);
+		return User.findOne({
+			'_id' : decoded._id,
+			'tokens.token' : token,
+			'tokens.access' : 'auth'
+		});
 	} catch (e) {
 		return Promise.reject();
 	}
-
-	return User.findOne({
-		'_id' : decoded._id,
-		'tokens.token' : token,
-		'tokens.access' : 'auth'
-	});
 };
 
 // Static Method findByCredential
-UserSchema.statics.findByCredentials = function (email, password) {
+UserSchema.statics.findByCredentials = async function (email, password) {
 	const User = this;
 
-	return User.findOne({email}).then((obj) => {
-		if (!obj) {
-			return Promise.reject();
-		}
+	const user = await User.findOne({email});
+	if(!user){
+		return Promise.reject();
+	}
 
-		return new Promise((resolve, reject) => {
-			bcrypt.compare(password, obj.password).then((status) => {
-				if (status) {
-					resolve(obj);
-				} else {
-					reject();
-				}
-			})
-		});
-	});
+	const status = await bcrypt.compare(password, user.password);
+	if(status){
+		return Promise.resolve(user);
+	}else {
+		return Promise.reject();
+	}
 };
 
 // Execute before save user
-UserSchema.pre('save', function (next) {
+UserSchema.pre('save', async function (next) {
 	const user = this;
 
 	if(user.isModified('password')){
-		bcrypt.genSalt(10).then((res) => {
-			bcrypt.hash(user.password,res).then((res) => {
-				user.password = res;
-				next();
-			})
-		}).catch((e) => {
+		try{
+			const salt = await bcrypt.genSalt(10);
+			const pass = await bcrypt.hash(user.password, salt);
+			user.password = pass;
+			next();
+		}catch (e){
 			console.log(e);
-		})
+		}
 	}else{
-		next()
+		next();
 	}
 });
 

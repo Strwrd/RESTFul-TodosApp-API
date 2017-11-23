@@ -12,55 +12,53 @@ const db = require('./../config/db');
 const {authenticate} = require('./../middleware/authenticate');
 
 //POST => Create Todo
-router.post('/todos/', authenticate, (req, res) => {
+router.post('/todos/', authenticate, async (req, res) => {
 	const newTodo = new Todo({
 		text: req.body.text,
 		creator: req.user._id
 	});
 
-	newTodo.save().then((obj) => {
-		return res.send({obj});
-	}).catch((e) => {
+	try{
+		const todo = await newTodo.save();
+		return res.send({todo});
+	}catch (e){
 		return res.status(400).send();
-	});
+	}
 });
 
 //GET => Getting All Todo
-router.get('/todos', authenticate, (req, res) => {
-	Todo.find({
-		creator: req.user._id
-	}).then((obj) => {
-		if (!obj) {
-			return res.status(404).send();
-		}
-		return res.send({obj});
-	}).catch((e) => {
+router.get('/todos', authenticate, async (req, res) => {
+	try{
+		const todos = await Todo.find({creator: req.user._id});
+		return res.send({todos});
+	}catch (e){
 		return res.status(400).send();
-	});
+	}
 });
 
 //GET => Getting Todo by ID
-router.get('/todos/:id', authenticate, (req, res) => {
+router.get('/todos/:id', authenticate, async (req, res) => {
 
 	if (!ObjectID.isValid(req.params.id)) {
 		return res.status(400).send();
 	}
 
-	Todo.findOne({
-		_id: req.params.id,
-		creator: req.user._id
-	}).then((obj) => {
-		if (!obj) {
+	try{
+		const todo = await Todo.findOne({
+			_id: req.params.id,
+			creator: req.user._id
+		});
+		if(!todo){
 			return res.status(404).send();
 		}
-		return res.send({obj});
-	}).catch((e) => {
+		return res.send({todo});
+	}catch (e){
 		return res.status(400).send();
-	})
+	}
 });
 
 //PATCH => Update Todo by ID
-router.patch('/todos/:id', authenticate,(req, res) => {
+router.patch('/todos/:id', authenticate, async (req, res) => {
 
 	if (!ObjectID.isValid(req.params.id)) {
 		return res.status(400).send()
@@ -75,36 +73,36 @@ router.patch('/todos/:id', authenticate,(req, res) => {
 		body.completedAt = null;
 	}
 
-	Todo.findOneAndUpdate({
-		_id : req.params.id,
-		creator : req.user._id
-	}, {$set: body}, {new: true}).then((obj) => {
-		if (!obj) {
-			return res.status(404).send()
+	try{
+		const todo = await Todo.findOneAndUpdate({
+			_id: req.params.id,
+			creator: req.user._id
+		}, {$set: body}, {new: true});
+		if(!todo){
+			return res.status(404).send();
 		}
-
-		return res.send({obj});
-	}).catch((e) => {
+		return res.send({todo});
+	}catch (e){
 		return res.status(400).send(e);
-	})
+	}
 });
 
 //DELETE => Delete Todo byID
-router.delete('/todos/:id', authenticate, (req, res) => {
+router.delete('/todos/:id', authenticate, async (req, res) => {
 
 	if (!ObjectID.isValid(req.params.id)) {
 		return res.status(400).send();
 	}
 
-	Todo.findOneAndRemove({ _id :req.params.id, creator : req.user._id}).then((obj) => {
-		if (!obj) {
+	try{
+		const todo = await Todo.findOneAndRemove({_id: req.params.id, creator: req.user._id});
+		if(!todo){
 			return res.status(404).send();
 		}
-
-		return res.send({obj});
-	}).catch((e) => {
+		return res.send({todo});
+	}catch (e){
 		res.status(400).send();
-	})
+	}
 });
 
 //Export modules

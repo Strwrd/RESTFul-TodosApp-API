@@ -23,7 +23,7 @@ describe('Todo Test Cases', () => {
 				.set('x-auth',dummyUser[0].tokens[0].token)
 				.expect(200)
 				.expect((res) => {
-					expect(res.body.obj.length).toBe(1);
+					expect(res.body.todos.length).toBe(1);
 				})
 				.end(done);
 		});
@@ -36,9 +36,9 @@ describe('Todo Test Cases', () => {
 				.set('x-auth',dummyUser[0].tokens[0].token)
 				.expect(200)
 				.expect((res) => {
-					expect(res.body.obj._id).toBe(dummyTodo[0]._id.toHexString());
-					expect(res.body.obj.text).toBe(dummyTodo[0].text);
-					expect(_.isObject(res.body.obj)).toBe(true);
+					expect(res.body.todo._id).toBe(dummyTodo[0]._id.toHexString());
+					expect(res.body.todo.text).toBe(dummyTodo[0].text);
+					expect(_.isObject(res.body.todo)).toBe(true);
 				}).end(done);
 		});
 
@@ -87,7 +87,7 @@ describe('Todo Test Cases', () => {
 				.send({text})
 				.expect(200)
 				.expect((res) => {
-					expect(res.body.obj.text).toBe(text);
+					expect(res.body.todo.text).toBe(text);
 				})
 				.end((err,res) => {
 					if(err){
@@ -132,9 +132,9 @@ describe('Todo Test Cases', () => {
 				.send(update)
 				.expect(200)
 				.expect((res) => {
-					expect(typeof res.body.obj.completedAt).toBe('number');
-					expect(res.body.obj.text).toBe(update.text);
-					expect(res.body.obj.completed).toBe(update.completed);
+					expect(typeof res.body.todo.completedAt).toBe('number');
+					expect(res.body.todo.text).toBe(update.text);
+					expect(res.body.todo.completed).toBe(update.completed);
 				})
 				.end(done);
 		});
@@ -167,8 +167,8 @@ describe('Todo Test Cases', () => {
 				.send(update)
 				.expect(200)
 				.expect((res) => {
-					expect(res.body.obj.completedAt).toBe(null);
-					expect(res.body.obj.completed).toBe(false);
+					expect(res.body.todo.completedAt).toBe(null);
+					expect(res.body.todo.completed).toBe(false);
 				})
 				.end(done);
 		});
@@ -183,7 +183,7 @@ describe('Todo Test Cases', () => {
 				.set('x-auth',dummyUser[0].tokens[0].token)
 				.expect(200)
 				.expect((res) => {
-					expect(res.body.obj._id).toBe(todoId);
+					expect(res.body.todo._id).toBe(todoId);
 				})
 				.end((err, res) => {
 					if (err) {

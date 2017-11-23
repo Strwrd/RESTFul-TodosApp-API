@@ -1,10 +1,11 @@
 //Local Module
 const {User} = require('./../models/user');
 
-const authenticate = (req, res, next) => {
+const authenticate = async (req, res, next) => {
 	const token = req.header('x-auth');
 
-	User.findByToken(token).then((user) => {
+	try{
+		const user = await User.findByToken(token);
 		if(!user){
 			return Promise.reject();
 		}
@@ -12,9 +13,9 @@ const authenticate = (req, res, next) => {
 		req.user = user;
 		req.token = token;
 		next();
-	}).catch((e) => {
+	}catch (e){
 		return res.status(401).send();
-	});
+	}
 };
 
 //Export Modules
